@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pod-affinity-1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels: 
+        app: pod-affinity-1
+    spec:
+      containers:
+        - image: wardviaene/k8s-demo
+          name: k8s-demo
+          ports:
+          - containerPort: 3000
+            name: k8s-demo-port
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pod-affinity-2
+spec:
+  replicas: 1
+  template: 
+    metadata:
+      labels:
+        app: pod-affinity-2
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: "app"
+                operator: In
+                values:
+                  - pod-affinity-1
+            topologyKey: kubernetes.io/hostname
+      containers: 
+        - image: redis
+          name: redis
+          ports:
+          - containerPort: 6379
+            name: redis-port
